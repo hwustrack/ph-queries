@@ -1,10 +1,34 @@
+import json
 import keyring
-import pandas as pd
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
 
+CACHE_FILE_NAME = "posts.tsv"
+
 
 def main():
+    use_cache = True
+    update_cache = True
+
+    if (use_cache):
+        with open(CACHE_FILE_NAME, 'r') as f:
+                posts = json.load(f)
+    else:
+        posts = get_posts(update_cache)
+
+    topics = {}
+    for post in posts:
+        for topic in post["topics"]:
+            if topic in topics:
+                topics[topic] += post["votesCount"]
+            else:
+                topics[topic] = post["votesCount"]
+
+    maxKey = max(topics, key=topics.get)
+    print(f"Max: {maxKey} - {topics[maxKey]}")
+
+
+def get_posts(update_cache):
     auth_token = keyring.get_password('producthunt', 'auth')
     client = Client(
         transport=RequestsHTTPTransport(
@@ -21,7 +45,6 @@ def main():
                     id
                     createdAt
                     name
-                    description
                     votesCount
                     topics {
                         edges {
@@ -38,8 +61,13 @@ def main():
 
     query_result = client.execute(query)
     posts = flatten(query_result)
-    df = pd.DataFrame(posts)
-    df.to_csv("posts.tsv", encoding='utf-8', sep="\t")
+
+    if update_cache:
+        with open(CACHE_FILE_NAME, 'w') as f:
+            json.dump(posts, f, indent=4)
+
+    return posts
+
 
 def flatten(query_result):
     result = []
@@ -55,6 +83,7 @@ def flatten(query_result):
         result.append(post)
 
     return result
+
 
 if __name__ == '__main__':
     main()
