@@ -1,9 +1,11 @@
 import json
 import keyring
+import statistics
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
+from posts_db import insert_posts
 
-CACHE_FILE_NAME = "posts.tsv"
+CACHE_FILE_NAME = "posts.json"
 
 
 def main():
@@ -16,16 +18,21 @@ def main():
     else:
         posts = get_posts(update_cache)
 
-    topics = {}
-    for post in posts:
-        for topic in post["topics"]:
-            if topic in topics:
-                topics[topic] += post["votesCount"]
-            else:
-                topics[topic] = post["votesCount"]
+    insert_posts(posts)
+    # topics = {}
+    # for post in posts:
+    #     for topic in post["topics"]:
+    #         if topic in topics:
+    #             topics[topic].append(post["votesCount"])
+    #         else:
+    #             topics[topic] = [post["votesCount"]]
 
-    maxKey = max(topics, key=topics.get)
-    print(f"Max: {maxKey} - {topics[maxKey]}")
+    # topic_means = {}
+    # for topic in topics.keys():
+    #     topic_means[topic] = statistics.mean(topics[topic])
+
+    # sorted_topic_means = {k: v for k, v in sorted(topic_means.items(), key=lambda item: item[1], reverse=True)}
+    # print(sorted_topic_means)
 
 
 def get_posts(update_cache):
