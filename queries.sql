@@ -15,3 +15,10 @@ JOIN topics t ON t.rowid = m.topic_id
 JOIN posts p on p.rowid = m.post_id
 GROUP BY m.topic_id
 ORDER BY norm DESC
+
+SELECT t.name, count(m.topic_id) count, sum(p.votesCount) votes
+FROM post_topics m 
+JOIN topics t ON t.rowid = m.topic_id
+JOIN posts p on p.rowid = m.post_id
+GROUP BY m.topic_id
+ORDER BY count ASC, votes DESC 
