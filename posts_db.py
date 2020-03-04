@@ -21,8 +21,10 @@ post_topics_columns = {
     'topic_id': 'INTEGER'
 }
 
+
 def main():
     create_schema()
+
 
 def create_schema():
     conn = sqlite3.connect(sqlite_file)
@@ -37,10 +39,12 @@ def create_schema():
 
     query = create_table_query(post_topics_table_name, post_topics_columns)
     c.execute(query)
-    c.execute('CREATE UNIQUE INDEX idx_post_topics_ids ON post_topics(post_id,topic_id)')
+    c.execute(
+        'CREATE UNIQUE INDEX idx_post_topics_ids ON post_topics(post_id,topic_id)')
 
     conn.commit()
     conn.close()
+
 
 def create_table_query(table_name, columns_dict):
     query = 'CREATE TABLE {tn} ('.format(tn=table_name)
@@ -50,21 +54,26 @@ def create_table_query(table_name, columns_dict):
     query += ')'
     return query
 
+
 def insert_posts(posts):
     conn = sqlite3.connect(sqlite_file)
     c = conn.cursor()
 
     for post in posts:
-        insert_posts_query = "INSERT INTO {pt} (id, createdAt, name, votesCount) VALUES(?, ?, ?, ?)".format(pt=posts_table_name)
-        c.execute(insert_posts_query, (post['id'], post['createdAt'], post['name'], post['votesCount']))
+        insert_posts_query = "INSERT INTO {pt} (id, createdAt, name, votesCount) VALUES(?, ?, ?, ?)".format(
+            pt=posts_table_name)
+        c.execute(insert_posts_query,
+                  (post['id'], post['createdAt'], post['name'], post['votesCount']))
         conn.commit()
         post_id = c.lastrowid
 
         for topic in post['topics']:
-            insert_topics_query = "INSERT INTO {tt} (name) VALUES(?) ON CONFLICT DO NOTHING".format(tt=topics_table_name)
+            insert_topics_query = "INSERT INTO {tt} (name) VALUES(?) ON CONFLICT DO NOTHING".format(
+                tt=topics_table_name)
             c.execute(insert_topics_query, (topic, ))
             conn.commit()
-            c.execute("SELECT rowid FROM {tt} WHERE name = ?".format(tt=topics_table_name), (topic, ))
+            c.execute("SELECT rowid FROM {tt} WHERE name = ?".format(
+                tt=topics_table_name), (topic, ))
             topic_id = c.fetchone()[0]
 
             insert_post_topics_query = 'INSERT INTO {ptt} (post_id, topic_id) VALUES(?, ?)'\
@@ -77,8 +86,10 @@ def insert_posts(posts):
     conn.commit()
     conn.close()
 
+
 def get_last_rowid(c):
     return c.execute('SELECT last_insert_rowid()')
+
 
 if __name__ == '__main__':
     main()

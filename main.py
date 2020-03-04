@@ -44,6 +44,8 @@ def get_posts(update_cache):
         )
     )
 
+    # TODO: commentsCount
+    # TODO: reviewsRating
     query = gql('''
     {
         posts(postedAfter: "2020-02-21T12:00:00Z", order: RANKING, first: 10) {
