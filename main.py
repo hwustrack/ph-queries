@@ -1,22 +1,17 @@
-import json
-import keyring
 import statistics
-from gql import Client, gql
-from gql.transport.requests import RequestsHTTPTransport
+
+import keyring
+
+from ph_client import get_posts
 from posts_db import insert_posts
 
 CACHE_FILE_NAME = "posts.json"
 
 
 def main():
-    use_cache = True
+    use_cache = False
     update_cache = True
-
-    if (use_cache):
-        with open(CACHE_FILE_NAME, 'r') as f:
-                posts = json.load(f)
-    else:
-        posts = get_posts(update_cache)
+    posts = get_posts(keyring.get_password('producthunt', 'auth'), use_cache, update_cache, CACHE_FILE_NAME)
 
     insert_posts(posts)
 
@@ -34,65 +29,6 @@ def main():
 
     # sorted_topic_means = {k: v for k, v in sorted(topic_means.items(), key=lambda item: item[1], reverse=True)}
     # print(sorted_topic_means)
-
-
-def get_posts(update_cache):
-    auth_token = keyring.get_password('producthunt', 'auth')
-    client = Client(
-        transport=RequestsHTTPTransport(
-            url='https://api.producthunt.com/v2/api/graphql',
-            headers={'Authorization': 'Bearer ' + auth_token}
-        )
-    )
-
-    query = gql('''
-    {
-        posts(postedAfter: "2020-02-01T12:00:00Z", order: RANKING, first: 100) {
-            edges {
-                node {
-                    id
-                    createdAt
-                    name
-                    votesCount
-                    commentsCount
-                    reviewsRating
-                    topics {
-                        edges {
-                            node {
-                                name
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    ''')
-
-    query_result = client.execute(query)
-    posts = flatten(query_result)
-
-    if update_cache:
-        with open(CACHE_FILE_NAME, 'w') as f:
-            json.dump(posts, f, indent=4)
-
-    return posts
-
-
-def flatten(query_result):
-    result = []
-
-    for postEdge in query_result["posts"]["edges"]:
-        post = postEdge["node"]
-        topics = []
-
-        for topicEdge in post["topics"]["edges"]:
-            topics.append(topicEdge["node"]["name"])
-
-        post["topics"] = topics
-        result.append(post)
-
-    return result
 
 
 if __name__ == '__main__':

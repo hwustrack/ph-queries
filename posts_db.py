@@ -34,6 +34,7 @@ def create_schema():
 
     query = create_table_query(posts_table_name, posts_columns)
     c.execute(query)
+    c.execute('CREATE UNIQUE INDEX idx_posts_id ON posts(id)')
 
     query = create_table_query(topics_table_name, topics_columns)
     c.execute(query)
