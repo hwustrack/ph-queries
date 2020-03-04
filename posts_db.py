@@ -7,7 +7,9 @@ posts_columns = {
     'id': 'INTEGER',
     'createdAt': 'TEXT',
     'name': 'TEXT',
-    'votesCount': 'INTEGER'
+    'votes_count': 'INTEGER',
+    'comments_count': 'INTEGER',
+    'reviews_rating': 'REAL'
 }
 
 topics_table_name = 'topics'
@@ -60,10 +62,10 @@ def insert_posts(posts):
     c = conn.cursor()
 
     for post in posts:
-        insert_posts_query = "INSERT INTO {pt} (id, createdAt, name, votesCount) VALUES(?, ?, ?, ?)".format(
-            pt=posts_table_name)
+        insert_posts_query = "INSERT INTO {pt} (id, createdAt, name, votes_count, comments_count, reviews_rating) VALUES(?, ?, ?, ?, ?, ?)"\
+            .format(pt=posts_table_name)
         c.execute(insert_posts_query,
-                  (post['id'], post['createdAt'], post['name'], post['votesCount']))
+                  (post['id'], post['createdAt'], post['name'], post['votesCount'], post['commentsCount'], post['reviewsRating']))
         conn.commit()
         post_id = c.lastrowid
 

@@ -19,6 +19,7 @@ def main():
         posts = get_posts(update_cache)
 
     insert_posts(posts)
+
     # topics = {}
     # for post in posts:
     #     for topic in post["topics"]:
@@ -44,17 +45,17 @@ def get_posts(update_cache):
         )
     )
 
-    # TODO: commentsCount
-    # TODO: reviewsRating
     query = gql('''
     {
-        posts(postedAfter: "2020-02-21T12:00:00Z", order: RANKING, first: 10) {
+        posts(postedAfter: "2020-02-01T12:00:00Z", order: RANKING, first: 100) {
             edges {
                 node {
                     id
                     createdAt
                     name
                     votesCount
+                    commentsCount
+                    reviewsRating
                     topics {
                         edges {
                             node {
