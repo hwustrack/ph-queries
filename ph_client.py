@@ -46,7 +46,7 @@ def format_query(end_cursor):
         after = ""
 
     query_str = '''{{
-        posts(postedAfter: "2020-02-01T12:00:00Z", order: RANKING, first: 100{after}) {{
+        posts(postedAfter: "2020-02-01T12:00:00Z", order: VOTES, first: 100{after}) {{
             edges {{
                 node {{
                     id
