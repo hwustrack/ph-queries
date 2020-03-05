@@ -1,5 +1,7 @@
 import sqlite3
 
+from sqlite3 import IntegrityError
+
 sqlite_file = 'posts.db'
 
 posts_table_name = 'posts'
@@ -64,10 +66,16 @@ def insert_posts(posts):
 
     for post in posts:
         insert_posts_query = "INSERT INTO {pt} (id, createdAt, name, votes_count, comments_count, reviews_rating)"\
-            " VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING"\
+            " VALUES(?, ?, ?, ?, ?, ?)"\
             .format(pt=posts_table_name)
-        c.execute(insert_posts_query,
-                  (post['id'], post['createdAt'], post['name'], post['votesCount'], post['commentsCount'], post['reviewsRating']))
+        
+        try:
+            c.execute(insert_posts_query,
+                (post['id'], post['createdAt'], post['name'], post['votesCount'], post['commentsCount'], post['reviewsRating']))
+        except IntegrityError as e:
+            print("IntegrityError encountered for post id {post_id} - {error}. Skipping.".format(post_id=post['id'], error=e))
+            continue
+
         conn.commit()
         post_id = c.lastrowid
 
@@ -80,7 +88,7 @@ def insert_posts(posts):
                 tt=topics_table_name), (topic, ))
             topic_id = c.fetchone()[0]
 
-            insert_post_topics_query = 'INSERT INTO {ptt} (post_id, topic_id) VALUES(?, ?) ON CONFLICT DO NOTHING'\
+            insert_post_topics_query = 'INSERT INTO {ptt} (post_id, topic_id) VALUES(?, ?)'\
                 .format(ptt=post_topics_table_name)
             c.execute(insert_post_topics_query, (post_id, topic_id))
             conn.commit()
