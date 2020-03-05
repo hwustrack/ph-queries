@@ -37,7 +37,7 @@ def get_posts_ph(auth_token):
     )
 
     MAX_REQUESTS = 450
-    MAX_POSTS = 200
+    MAX_POSTS = 1000
     SLEEP_TIME = 915
 
     if path.exists(CACHE_CURSOR_FILE_NAME):

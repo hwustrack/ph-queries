@@ -80,7 +80,7 @@ def insert_posts(posts):
                 tt=topics_table_name), (topic, ))
             topic_id = c.fetchone()[0]
 
-            insert_post_topics_query = 'INSERT INTO {ptt} (post_id, topic_id) VALUES(?, ?)'\
+            insert_post_topics_query = 'INSERT INTO {ptt} (post_id, topic_id) VALUES(?, ?) ON CONFLICT DO NOTHING'\
                 .format(ptt=post_topics_table_name)
             c.execute(insert_post_topics_query, (post_id, topic_id))
             conn.commit()
