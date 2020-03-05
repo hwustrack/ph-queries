@@ -21,14 +21,30 @@ def annual(conn):
 
     print("===== Annual =====")
 
+    # topics with most posts
     query = '''
-    SELECT t.name, m.topic_id, count(m.topic_id) count
+    SELECT t.name, count(m.topic_id) count
     FROM post_topics m 
     JOIN topics t ON t.rowid = m.topic_id
     JOIN posts p on p.rowid = m.post_id
-    -- WHERE p.createdAt < "2019-02-01T00:00:00Z" and p.createdAt > "2019-01-01T00:00:00Z"
     GROUP BY m.topic_id
     ORDER BY count DESC
+    LIMIT 10;
+    '''
+    c.execute(query)
+    results = c.fetchall()
+    pprint(results)
+
+    # topics with most average votes
+    query = '''
+    SELECT t.name, count(m.topic_id) count, sum(p.votes_count) votes, 
+        sum(p.votes_count) / count(m.topic_id) mean
+    FROM post_topics m 
+    JOIN topics t ON t.rowid = m.topic_id
+    JOIN posts p on p.rowid = m.post_id
+    GROUP BY m.topic_id
+    HAVING count > 4
+    ORDER BY mean DESC
     LIMIT 10;
     '''
     c.execute(query)
@@ -45,6 +61,7 @@ def monthly(conn, months):
     for i in range(len(months) - 1):
         print(months[i])
 
+        # topics with most posts
         query = '''
         SELECT t.name, count(m.topic_id) count
         FROM post_topics m 
@@ -59,6 +76,7 @@ def monthly(conn, months):
         results = c.fetchall()
         pprint(results)
 
+        # topics with most average votes
         query = '''
         SELECT t.name, count(m.topic_id) count, sum(p.votes_count) votes, 
             sum(p.votes_count) / count(m.topic_id) mean
@@ -67,6 +85,7 @@ def monthly(conn, months):
         JOIN posts p on p.rowid = m.post_id
         WHERE p.createdAt > "{after}" AND p.createdAt < "{before}"
         GROUP BY m.topic_id
+        HAVING COUNT > 4
         ORDER BY mean DESC
         LIMIT 3;
         '''.format(after=months[i], before=months[i + 1])
