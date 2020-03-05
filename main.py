@@ -5,13 +5,11 @@ import keyring
 from ph_client import get_posts
 from posts_db import insert_posts
 
-CACHE_FILE_NAME = "posts.json"
-
 
 def main():
-    use_cache = False
+    use_cache = True
     update_cache = True
-    posts = get_posts(keyring.get_password('producthunt', 'auth'), use_cache, update_cache, CACHE_FILE_NAME)
+    posts = get_posts(keyring.get_password('producthunt', 'auth'), use_cache, update_cache)
 
     insert_posts(posts)
 

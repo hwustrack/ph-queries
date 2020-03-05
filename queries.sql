@@ -6,11 +6,11 @@ SELECT count(*) FROM posts;
 SELECT count(*) FROM topics;
 SELECT count(*) FROM post_topics;
 
--- DELETE FROM posts;
--- DELETE FROM topics;
--- DELETE FROM post_topics;
+DELETE FROM posts;
+DELETE FROM topics;
+DELETE FROM post_topics;
 
-CREATE UNIQUE INDEX idx_posts_id ON posts(id);
+-- CREATE UNIQUE INDEX idx_posts_id ON posts(id);
 
 SELECT * FROM post_topics m
 JOIN topics t on t.rowid = m.topic_id

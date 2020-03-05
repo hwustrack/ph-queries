@@ -63,7 +63,8 @@ def insert_posts(posts):
     c = conn.cursor()
 
     for post in posts:
-        insert_posts_query = "INSERT INTO {pt} (id, createdAt, name, votes_count, comments_count, reviews_rating) VALUES(?, ?, ?, ?, ?, ?)"\
+        insert_posts_query = "INSERT INTO {pt} (id, createdAt, name, votes_count, comments_count, reviews_rating)"\
+            " VALUES(?, ?, ?, ?, ?, ?) ON CONFLICT DO NOTHING"\
             .format(pt=posts_table_name)
         c.execute(insert_posts_query,
                   (post['id'], post['createdAt'], post['name'], post['votesCount'], post['commentsCount'], post['reviewsRating']))
