@@ -72,18 +72,20 @@ def insert_posts(posts):
         try:
             c.execute(insert_posts_query,
                 (post['id'], post['createdAt'], post['name'], post['votesCount'], post['commentsCount'], post['reviewsRating']))
+            
+            conn.commit()
+            post_id = c.lastrowid
+
         except IntegrityError as e:
             print("IntegrityError encountered for post id {post_id} - {error}. Skipping.".format(post_id=post['id'], error=e))
             continue
-
-        conn.commit()
-        post_id = c.lastrowid
 
         for topic in post['topics']:
             insert_topics_query = "INSERT INTO {tt} (name) VALUES(?) ON CONFLICT DO NOTHING".format(
                 tt=topics_table_name)
             c.execute(insert_topics_query, (topic, ))
             conn.commit()
+            
             c.execute("SELECT rowid FROM {tt} WHERE name = ?".format(
                 tt=topics_table_name), (topic, ))
             topic_id = c.fetchone()[0]
@@ -93,9 +95,6 @@ def insert_posts(posts):
             c.execute(insert_post_topics_query, (post_id, topic_id))
             conn.commit()
 
-        conn.commit()
-
-    conn.commit()
     conn.close()
 
 
