@@ -7,7 +7,7 @@ sqlite_file = 'posts.db'
 posts_table_name = 'posts'
 posts_columns = {
     'id': 'INTEGER',
-    'createdAt': 'TEXT',
+    'created_at': 'TEXT',
     'name': 'TEXT',
     'votes_count': 'INTEGER',
     'comments_count': 'INTEGER',
@@ -65,7 +65,7 @@ def insert_posts(posts):
     c = conn.cursor()
 
     for post in posts:
-        insert_posts_query = "INSERT INTO {pt} (id, createdAt, name, votes_count, comments_count, reviews_rating)"\
+        insert_posts_query = "INSERT INTO {pt} (id, created_at, name, votes_count, comments_count, reviews_rating)"\
             " VALUES(?, ?, ?, ?, ?, ?)"\
             .format(pt=posts_table_name)
         
