@@ -15,11 +15,29 @@ def main():
 def analyze():
     conn = sqlite3.connect(sqlite_file)
 
-    annual(conn)
-    monthly(conn, get_months())
+    df(conn)
+    # annual(conn)
+    # monthly(conn, get_months())
 
     conn.close()
 
+
+def df(conn):
+    query = '''
+    SELECT p.rowid as p_rowid, p.name as p_name, p.votes_count, p.createdAt, 
+        t.rowid as t_rowid, t.name as t_name
+    FROM post_topics m 
+    JOIN topics t ON t.rowid = m.topic_id
+    JOIN posts p on p.rowid = m.post_id;
+    '''
+    df = pd.read_sql_query(query, conn)
+    topics_agg = df.groupby(['t_rowid'], as_index=False).agg(
+                {'t_name':'first', 'votes_count':['count', 'mean','std']})
+    topics_agg.columns = ['topic_id', 'topic_name', 'count', 'votes_mean', 'votes_std']
+    topics_agg.sort_values('votes_mean', ascending=False, inplace=True)
+    topics_agg = topics_agg[topics_agg['count'] > 9]
+
+    pprint(topics_agg)
 
 def annual(conn):
     c = conn.cursor()
