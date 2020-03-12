@@ -31,13 +31,25 @@ def df(conn):
     JOIN posts p on p.rowid = m.post_id;
     '''
     df = pd.read_sql_query(query, conn)
+
+    # aggregate
     topics_agg = df.groupby(['t_rowid'], as_index=False).agg(
                 {'t_name':'first', 'votes_count':['count', 'mean','std']})
     topics_agg.columns = ['topic_id', 'topic_name', 'count', 'votes_mean', 'votes_std']
-    topics_agg.sort_values('votes_mean', ascending=False, inplace=True)
+    
+    # filter
     topics_agg = topics_agg[topics_agg['count'] > 9]
 
-    pprint(topics_agg)
+    # bin
+    bins = range(0, 1000, 50)
+    topics_agg['votes_mean_bin'] = pd.cut(topics_agg['votes_mean'], bins)
+
+    # sort
+    topics_agg.sort_values(['votes_mean_bin', 'votes_std'], ascending=[False, True], inplace=True)
+    print(topics_agg)
+
+    topics_agg.sort_values('votes_std', inplace=True)
+    print(topics_agg)
 
 def annual(conn):
     c = conn.cursor()
