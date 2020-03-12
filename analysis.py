@@ -1,7 +1,5 @@
 import sqlite3
-import statistics
-from collections import defaultdict
-from pprint import pprint
+from datetime import datetime
 
 import pandas as pd
 
@@ -18,6 +16,7 @@ def analyze():
     df = extract(conn)
 
     # df = df[df['createdAt'] > get_months()[12]]
+    created_trends(df)
     aggregate(df)
 
     conn.close()
@@ -60,6 +59,11 @@ def aggregate(df):
     topics_agg.sort_values('count', ascending=False, inplace=True)
     print("Sorted by count")
     print(topics_agg.head())
+
+
+def created_trends(df):
+    df['hour_bin'] = pd.cut(pd.to_datetime(
+        df['created_at']).dt.hour, bins=range(0, 25, 1))
 
 
 def get_months():
