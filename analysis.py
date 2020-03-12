@@ -25,7 +25,7 @@ def analyze():
 
 def extract(conn):
     query = '''
-    SELECT p.rowid as p_rowid, p.name as p_name, p.votes_count, p.createdAt, 
+    SELECT p.rowid as p_rowid, p.name as p_name, p.votes_count, p.created_at, 
         t.rowid as t_rowid, t.name as t_name
     FROM post_topics m 
     JOIN topics t ON t.rowid = m.topic_id
