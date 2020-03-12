@@ -15,14 +15,14 @@ def main():
 def analyze():
     conn = sqlite3.connect(sqlite_file)
 
-    df(conn)
+    annual(conn)
     # annual(conn)
     # monthly(conn, get_months())
 
     conn.close()
 
 
-def df(conn):
+def annual(conn):
     query = '''
     SELECT p.rowid as p_rowid, p.name as p_name, p.votes_count, p.createdAt, 
         t.rowid as t_rowid, t.name as t_name
@@ -51,7 +51,11 @@ def df(conn):
     topics_agg.sort_values('votes_std', inplace=True)
     print(topics_agg)
 
-def annual(conn):
+    topics_agg.sort_values('count', ascending=False, inplace=True)
+    print(topics_agg)
+
+
+def annual_old(conn):
     c = conn.cursor()
 
     print("===== Annual =====")
@@ -85,7 +89,7 @@ def annual(conn):
     print("==========")
 
 
-def monthly(conn, months):
+def monthly_old(conn, months):
     c = conn.cursor()
 
     print("===== Monthly =====")
