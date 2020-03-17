@@ -13,10 +13,9 @@ def main():
 def analyze():
     conn = sqlite3.connect(sqlite_file)
 
-    df = extract(conn)
+    hourly(conn)
 
-    # df = df[df['createdAt'] > get_months()[12]]
-    created_trends(df)
+    df = extract(conn)
     aggregate(df)
 
     conn.close()
@@ -61,9 +60,19 @@ def aggregate(df):
     print(topics_agg.head())
 
 
-def created_trends(df):
+def hourly(conn):
+    query = '''
+    SELECT rowid as rowid, name as name, votes_count, p.created_at
+    FROM posts p;
+    '''
+    df = pd.read_sql_query(query, conn)
+
     df['hour_bin'] = pd.cut(pd.to_datetime(
-        df['created_at']).dt.hour, bins=range(0, 25, 1))
+        df['created_at']).dt.hour, bins=range(0, 24, 1))
+    hourly = df.groupby(['hour_bin'], as_index=False).agg(
+        {'votes_count': ['count', 'mean', 'std']})
+    hourly.columns = ['hour_bin', 'count', 'votes_mean', 'votes_std']
+    hourly.to_csv('hourly.tsv', sep='\t', encoding='utf-8')
 
 
 def get_months():
