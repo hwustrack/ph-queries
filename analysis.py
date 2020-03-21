@@ -13,10 +13,11 @@ def main():
 def analyze():
     conn = sqlite3.connect(sqlite_file)
 
+    # all(conn)
     hourly(conn)
 
-    df = extract(conn)
-    aggregate(df)
+    # df = extract(conn)
+    # aggregate(df)
 
     conn.close()
 
@@ -42,22 +43,36 @@ def aggregate(df):
     topics_agg = topics_agg[topics_agg['count'] > 9]
 
     # bin
-    bins = range(0, 1000, 50)
+    bins = range(0, 1200, 50)
     topics_agg['votes_mean_bin'] = pd.cut(topics_agg['votes_mean'], bins)
 
     # sort
+    topics_agg.sort_values('count', ascending=False, inplace=True)
+    print("Sorted by count")
+    print(topics_agg.to_csv(sep="-", encoding="utf-8"))
+
+    topics_agg.sort_values(['votes_mean', 'votes_std'],
+                           ascending=[False, True], inplace=True)
+    print("Sorted by votes mean, std")
+    print(topics_agg.to_csv(sep="-", encoding="utf-8"))
+
     topics_agg.sort_values(['votes_mean_bin', 'votes_std'], ascending=[
                            False, True], inplace=True)
     print("Sorted by binned votes, std")
-    print(topics_agg.head())
+    print(topics_agg.to_csv(sep="-", encoding="utf-8"))
 
     topics_agg.sort_values('votes_std', inplace=True)
     print("Sorted by std")
-    print(topics_agg.head())
+    print(topics_agg.to_csv(sep="-", encoding="utf-8"))
 
-    topics_agg.sort_values('count', ascending=False, inplace=True)
-    print("Sorted by count")
-    print(topics_agg.head())
+
+def all(conn):
+    query = '''
+    SELECT rowid as rowid, name as name, votes_count, p.created_at
+    FROM posts p;
+    '''
+    df = pd.read_sql_query(query, conn)
+    df.to_csv('posts.tsv', sep='\t', encoding='utf-8')
 
 
 def hourly(conn):
@@ -68,10 +83,11 @@ def hourly(conn):
     df = pd.read_sql_query(query, conn)
 
     df['hour_bin'] = pd.cut(pd.to_datetime(
-        df['created_at']).dt.hour, bins=range(0, 24, 1))
+        df['created_at']).dt.hour, bins=range(0, 25, 1), right=False)
     hourly = df.groupby(['hour_bin'], as_index=False).agg(
         {'votes_count': ['count', 'mean', 'std']})
     hourly.columns = ['hour_bin', 'count', 'votes_mean', 'votes_std']
+    hourly['pct'] = 100 * hourly['count'] / hourly['count'].sum()
     hourly.to_csv('hourly.tsv', sep='\t', encoding='utf-8')
 
 
